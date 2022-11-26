@@ -44,6 +44,14 @@ async function run() {
             const options = await categoriesProductCollection.find(query).toArray();
             res.send(options);
         })
+        // get orders api
+        app.get('/orders', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const query = { email: email };
+            const orders = await ordersCollection.find(query).toArray();
+            res.send(orders);
+        })
 
         // orders api
         app.post('/orders', async (req, res) => {
