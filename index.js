@@ -23,6 +23,7 @@ async function run() {
         const categoriesCollection = client.db('furnob').collection('Categories');
         const categoriesProductCollection = client.db('furnob').collection('categoriesProduct');
         const ordersCollection = client.db('furnob').collection('orders');
+        const usersCollection = client.db('furnob').collection('users');
 
 
         app.get('/Categories', async (req, res) => {
@@ -33,11 +34,11 @@ async function run() {
 
         app.get('/categoriesProduct', async (req, res) => {
             // const id = req.params.id
-            // const test = id === _id;
+
             // console.log(id);
 
             // // const query = { _id: ObjectId(id) }
-            // const query = { test }
+
             const query = {}
             console.log(query);
 
@@ -58,6 +59,14 @@ async function run() {
             const order = req.body
             console.log(order);
             const result = await ordersCollection.insertOne(order);
+            res.send(result);
+        });
+
+
+        // users registered api
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
             res.send(result);
         })
 
