@@ -35,23 +35,49 @@ async function run() {
 
 
 
-        app.get('/categoriesProduct', async (req, res) => {
-            // const id = req.query.id
+        // app.get('/ct', async (req, res) => {
 
-            // console.log(id);
+        //     const params = req.params.id;
+        //     console.log(params);
+        //     const query = { id: params }
 
-            // const query = { _id: ObjectId(id) }
 
-            const query = {}
-            console.log(query);
+        //     const options = await categoriesProductCollection.find(query).toArray();
+        //     res.send(options);
+        // })
 
-            const options = await categoriesProductCollection.filter(query).toArray();
+        // -----------------
+
+        // all seller
+        app.get('/allseller', async (req, res) => {
+            const seller = { role: "seller" }
+            const result = await usersCollection.find(seller).toArray();
+            res.send(result);
+        });
+
+        app.get('/allbyers', async (req, res) => {
+            const byer = { role: "user" }
+            const result = await usersCollection.find(byer).toArray();
+            res.send(result);
+        });
+
+
+
+
+        app.get('/ct/:id', async (req, res) => {
+            const params = req.params.id;
+            console.log(params);
+            const query = { id: params }
+
+
+            const options = await categoriesProductCollection.find(query).toArray();
             res.send(options);
+
         })
         // get orders api
-        app.get('/orders', async (req, res) => {
+        app.get('/pro', async (req, res) => {
             const email = req.query.email;
-            console.log(email);
+            // console.log(email);
             const query = { email: email };
             const orders = await ordersCollection.find(query).toArray();
             res.send(orders);
@@ -59,7 +85,7 @@ async function run() {
         // wishlist posst
         app.post('/wishList', async (req, res) => {
             const wishlist = req.body;
-            console.log(wishlist);
+            // console.log(wishlist);
             const result = await wishListCollection.insertOne(wishlist);
             res.send(result);
 
@@ -68,7 +94,7 @@ async function run() {
         // orders api
         app.post('/orders', async (req, res) => {
             const order = req.body
-            console.log(order);
+            // console.log(order);
             const result = await ordersCollection.insertOne(order);
             res.send(result);
         });
@@ -97,6 +123,7 @@ async function run() {
         // make admin
         app.put('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
+
             const filter = { email: email }
 
             const options = { upsert: true }; updatedDoc = {
@@ -111,10 +138,11 @@ async function run() {
 
         // get admin 
 
-        app.get('/users/admin/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) }
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
             const user = await usersCollection.findOne(query)
+            console.log(user);
             res.send({ isAdmin: user?.role === 'admin' });
         })
 
