@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId, ObjectID } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -24,6 +24,7 @@ async function run() {
         const categoriesProductCollection = client.db('furnob').collection('categoriesProduct');
         const ordersCollection = client.db('furnob').collection('orders');
         const usersCollection = client.db('furnob').collection('users');
+        const wishListCollection = client.db('furnob').collection('wishList');
 
 
         app.get('/Categories', async (req, res) => {
@@ -32,17 +33,19 @@ async function run() {
             res.send(options);
         })
 
+
+
         app.get('/categoriesProduct', async (req, res) => {
-            // const id = req.params.id
+            // const id = req.query.id
 
             // console.log(id);
 
-            // // const query = { _id: ObjectId(id) }
+            // const query = { _id: ObjectId(id) }
 
             const query = {}
             console.log(query);
 
-            const options = await categoriesProductCollection.find(query).toArray();
+            const options = await categoriesProductCollection.filter(query).toArray();
             res.send(options);
         })
         // get orders api
@@ -52,7 +55,15 @@ async function run() {
             const query = { email: email };
             const orders = await ordersCollection.find(query).toArray();
             res.send(orders);
-        })
+        });
+        // wishlist posst
+        app.post('/wishList', async (req, res) => {
+            const wishlist = req.body;
+            console.log(wishlist);
+            const result = await wishListCollection.insertOne(wishlist);
+            res.send(result);
+
+        });
 
         // orders api
         app.post('/orders', async (req, res) => {
@@ -61,13 +72,50 @@ async function run() {
             const result = await ordersCollection.insertOne(order);
             res.send(result);
         });
+        // get users api
+        app.get('/users', async (req, res) => {
+            // const users = req.query.role;
+            // const query = { role: users };
+            // const result = await usersCollection.find(query).toArray();
+            // res.send(users)
+            const query = {}
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
 
+
+        })
 
         // users registered api
         app.post('/users', async (req, res) => {
             const user = req.body;
+            console.log(user);
             const result = await usersCollection.insertOne(user);
             res.send(result);
+        });
+
+
+        // make admin
+        app.put('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email }
+
+            const options = { upsert: true }; updatedDoc = {
+                $set: {
+                    category: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, options, updatedDoc)
+            res.send(result);
+
+        })
+
+        // get admin 
+
+        app.get('/users/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const user = await usersCollection.findOne(query)
+            res.send({ isAdmin: user?.role === 'admin' });
         })
 
 
