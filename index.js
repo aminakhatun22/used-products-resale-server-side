@@ -25,8 +25,9 @@ async function run() {
         const ordersCollection = client.db('furnob').collection('orders');
         const usersCollection = client.db('furnob').collection('users');
         const wishListCollection = client.db('furnob').collection('wishList');
+        const productsCollection = client.db('furnob').collection('products');
 
-
+        // all category api
         app.get('/Categories', async (req, res) => {
             const query = {};
             const options = await categoriesCollection.find(query).toArray();
@@ -35,18 +36,6 @@ async function run() {
 
 
 
-        // app.get('/ct', async (req, res) => {
-
-        //     const params = req.params.id;
-        //     console.log(params);
-        //     const query = { id: params }
-
-
-        //     const options = await categoriesProductCollection.find(query).toArray();
-        //     res.send(options);
-        // })
-
-        // -----------------
 
         // all seller
         app.get('/allseller', async (req, res) => {
@@ -54,17 +43,39 @@ async function run() {
             const result = await usersCollection.find(seller).toArray();
             res.send(result);
         });
-
-        app.get('/allbyers', async (req, res) => {
-            const byer = { role: "user" }
-            const result = await usersCollection.find(byer).toArray();
+        // all buyers api
+        app.get('/allbuyers', async (req, res) => {
+            const buyer = { role: "user" }
+            const result = await usersCollection.find(buyer).toArray();
             res.send(result);
+        });
+
+        app.get('/buyer', async (req, res) => {
+            const query = { email: req.query.email }
+            let data = {}
+
+            const result = await usersCollection.findOne(query)
+            const user = result.role === 'user';
+            if (user) {
+                data = { isBuyer: true }
+                // console.log(user);
+
+            } else {
+                data = { isBuyer: false }
+                // console.log(user);
+
+
+            }
+            res.send(data)
+
+
         });
 
 
 
+        // catepro api
 
-        app.get('/ct/:id', async (req, res) => {
+        app.get('/categoriesProduct/:id', async (req, res) => {
             const params = req.params.id;
             console.log(params);
             const query = { id: params }
@@ -75,35 +86,26 @@ async function run() {
 
         })
         // get orders api
-        app.get('/pro', async (req, res) => {
+        app.get('/orders', async (req, res) => {
             const email = req.query.email;
-            // console.log(email);
+            console.log(email);
+
             const query = { email: email };
             const orders = await ordersCollection.find(query).toArray();
             res.send(orders);
         });
-        // wishlist posst
-        app.post('/wishList', async (req, res) => {
-            const wishlist = req.body;
-            // console.log(wishlist);
-            const result = await wishListCollection.insertOne(wishlist);
-            res.send(result);
 
-        });
 
         // orders api
         app.post('/orders', async (req, res) => {
             const order = req.body
-            // console.log(order);
+
             const result = await ordersCollection.insertOne(order);
             res.send(result);
         });
         // get users api
         app.get('/users', async (req, res) => {
-            // const users = req.query.role;
-            // const query = { role: users };
-            // const result = await usersCollection.find(query).toArray();
-            // res.send(users)
+
             const query = {}
             const users = await usersCollection.find(query).toArray();
             res.send(users);
@@ -121,30 +123,67 @@ async function run() {
 
 
         // make admin
-        app.put('/users/admin/:email', async (req, res) => {
-            const email = req.params.email;
+        app.put('/users/admin', async (req, res) => {
+            // const email = req.params.email;
 
-            const filter = { email: email }
+            // const filter = { email: email }
 
-            const options = { upsert: true }; updatedDoc = {
+            const options = { upsert: true };
+            console.log(options);
+            updatedDoc = {
                 $set: {
-                    category: 'admin'
+                    role: 'admin'
                 }
             }
-            const result = await usersCollection.updateOne(filter, options, updatedDoc)
+            const result = await usersCollection.updateMany(options, updatedDoc).toArray();
             res.send(result);
 
         })
 
         // get admin 
 
-        app.get('/users/admin/:email', async (req, res) => {
+        app.get('/users/admin', async (req, res) => {
+
+            const query = { role: 'admin' };
+            const user = await usersCollection.find(query).toArray();
+            console.log(user);
+            res.send(user);
+        }),
+
+
+            // category name get api
+
+            app.get('/Categories/name', async (req, res) => {
+                const query = {}
+                // console.log(query);
+                const result = await categoriesCollection.find(query).project({ name: 1 }).toArray();
+            })
+
+        // role:user api
+        app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
-            const user = await usersCollection.findOne(query)
-            console.log(user);
-            res.send({ isAdmin: user?.role === 'admin' });
-        })
+            const user = await usersCollection.findOne(query);
+            res.send({ isUser: user?.role === 'user' });
+        });
+
+        // add product api
+        app.post('/products', async (req, res) => {
+            const products = req.body;
+            const result = await productsCollection.insertOne(products);
+            res.send(result);
+        });
+
+        // get product api
+        app.get('/products', async (req, res) => {
+            const email = req.query.email;
+
+            const query = { email: email };
+            const products = await productsCollection.find(query).toArray();
+            res.send(products);
+        });
+
+
 
 
 
