@@ -50,26 +50,7 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/buyer', async (req, res) => {
-            const query = { email: req.query.email }
-            let data = {}
 
-            const result = await usersCollection.findOne(query)
-            const user = result.role === 'user';
-            if (user) {
-                data = { isBuyer: true }
-                // console.log(user);
-
-            } else {
-                data = { isBuyer: false }
-                // console.log(user);
-
-
-            }
-            res.send(data)
-
-
-        });
 
 
 
@@ -122,50 +103,14 @@ async function run() {
         });
 
 
-        // make admin
-        app.put('/users/admin', async (req, res) => {
-            // const email = req.params.email;
-
-            // const filter = { email: email }
-
-            const options = { upsert: true };
-            console.log(options);
-            updatedDoc = {
-                $set: {
-                    role: 'admin'
-                }
-            }
-            const result = await usersCollection.updateMany(options, updatedDoc).toArray();
-            res.send(result);
-
-        })
-
-        // get admin 
-
-        app.get('/users/admin', async (req, res) => {
-
-            const query = { role: 'admin' };
-            const user = await usersCollection.find(query).toArray();
-            console.log(user);
-            res.send(user);
-        }),
 
 
-            // category name get api
 
-            app.get('/Categories/name', async (req, res) => {
-                const query = {}
-                // console.log(query);
-                const result = await categoriesCollection.find(query).project({ name: 1 }).toArray();
-            })
 
-        // role:user api
-        app.get('/users/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { email: email }
-            const user = await usersCollection.findOne(query);
-            res.send({ isUser: user?.role === 'user' });
-        });
+
+
+
+
 
         // add product api
         app.post('/products', async (req, res) => {
@@ -182,6 +127,54 @@ async function run() {
             const products = await productsCollection.find(query).toArray();
             res.send(products);
         });
+        // ----------------api role:user
+        app.get('/users/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isUser: user?.role === 'user' });
+        });
+
+        // role:seller
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isSeller: user?.role === 'seller' });
+        });
+
+
+        // role:admin
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'admin' });
+        });
+
+        // delete product
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        app.delete('/allseller/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        app.delete('/allbuyers/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+
 
 
 
